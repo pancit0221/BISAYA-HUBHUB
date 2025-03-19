@@ -1,0 +1,263 @@
+local Library = loadstring(game:HttpGet('https://raw.githubusercontent.com/Loco-CTO/UI-Library/main/VisionLibV2/source.lua'))()
+
+Window = Library:Create({
+	Name = "BISAYA HUB",
+	Footer = " by Pandeya",
+	ToggleKey = Enum.KeyCode.RightShift,
+	LoadedCallback = function()
+		Window:TaskBarOnly(false)
+	end,
+})
+
+Window:ChangeTogglekey(Enum.KeyCode.RightShift)
+
+local Tab = Window:Tab({
+	Name = "Main",
+	Icon = "rbxassetid://11396131982",
+	Color = Color3.new(1, 0, 0),
+})
+
+local Section1 = Tab:Section({
+	Name = "Basic controls",
+})
+
+local Label = Section1:Label({
+	Name = "TANGINAMO PAKYO",
+})
+
+local Button = Section1:Button({
+	Name = "ANTI GAGO",
+	Callback = function()
+            -- Load the VirtualUser service
+local VirtualUser = game:GetService('VirtualUser')
+
+-- Function to simulate mouse movement
+local function simulateMouseMovement()
+    while true do
+        -- Simulate mouse movement by clicking
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new(math.random(), math.random()))
+        wait(30) -- Simulate movement every 30 seconds
+    end
+end
+
+-- Send a notification that the script is activated
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "Anti-AFK Script",
+    Text = "Script is Activated, Yuzi",
+    Duration = 5
+})
+
+-- Start the anti-AFK loop
+simulateMouseMovement()
+		Library:Notify({
+			Name = "Button",
+			Text = "Clicked",
+			Icon = "rbxassetid://11401835376",
+			Duration = 3,
+		})
+	end,
+})
+
+-- Track the event connections
+local platform1Connection, platform2Connection
+
+local Toggle = Section1:Toggle({
+    Name = "AUTO READY",
+    Default = false,
+    Callback = function(Bool)
+        -- Get services
+        local Players = game:GetService("Players")
+        local workspace = game:GetService("Workspace")
+
+        -- Locate the ReadyZone
+        local readyZone = workspace["New Lobby"].ReadyArea.ReadyZone
+
+        -- Locate the specific platform parts
+        local platform1 = workspace["New Lobby"].Lobby.Build:GetChildren()[13]:FindFirstChild("Meshes/Platform_Cube.010 (1)")
+        local platform2 = workspace["New Lobby"].Lobby.Build:GetChildren()[13]:FindFirstChild("Meshes/Platform_Cube.012 (1)")
+
+        -- Function to teleport the player to the ReadyZone
+        local function teleportPlayer(player)
+            -- Check if the player has a character and a primary part (HumanoidRootPart)
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                -- Teleport to the ReadyZone by setting the player's CFrame to the ReadyZone's CFrame
+                player.Character:SetPrimaryPartCFrame(readyZone.CFrame)
+            else
+                warn(player.Name .. "'s character is missing the HumanoidRootPart.")
+            end
+        end
+
+        -- Function to handle when a player touches one of the platforms
+        local function onPlatformTouched(otherPart)
+            local player = Players:GetPlayerFromCharacter(otherPart.Parent)
+            
+            -- Check if the other part is from a player
+            if player then
+                -- Teleport the player if they touched the platform
+                teleportPlayer(player)
+            end
+        end
+
+        -- If the toggle is enabled, connect the Touched event for both platforms
+        if Bool then
+            -- Ensure platforms exist before connecting the event
+            if platform1 and not platform1Connection then
+                platform1Connection = platform1.Touched:Connect(onPlatformTouched)
+            end
+
+            if platform2 and not platform2Connection then
+                platform2Connection = platform2.Touched:Connect(onPlatformTouched)
+            end
+
+            Library:Notify({
+                Name = "Toggle",
+                Text = "AUTO READY: Enabled",
+                Icon = "rbxassetid://11401835376",
+                Duration = 3,
+            })
+        else
+            -- If the toggle is off, disconnect the events to stop teleportation
+            if platform1Connection then
+                platform1Connection:Disconnect()
+                platform1Connection = nil
+            end
+
+            if platform2Connection then
+                platform2Connection:Disconnect()
+                platform2Connection = nil
+            end
+
+            Library:Notify({
+                Name = "Toggle",
+                Text = "AUTO READY: Disabled",
+                Icon = "rbxassetid://11401835376",
+                Duration = 3,
+            })
+        end
+    end,
+})
+
+local Section = Tab:Section({
+    Name = "STARING CONTEST" -- String
+})
+
+-- Player and character setup
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Variable to hold the target player
+local targetPlayer = nil
+
+-- Function to dynamically set the target player (can be triggered by UI or other means)
+local function setTargetPlayer(targetName)
+    targetPlayer = game.Players:FindFirstChild(targetName)
+    if targetPlayer then
+        print("Target player set to:", targetPlayer.Name)
+    else
+        print("Target player not found!")
+    end
+end
+
+-- Flag to check if the character should face the target
+local isFacingTarget = false
+local faceTargetConnection = nil
+
+-- Function to make the character face the target
+local function faceTargetLoop()
+    while isFacingTarget do
+        -- Ensure both local character and target character exist
+        if character and targetPlayer and targetPlayer.Character then
+            local targetHumanoidRootPart = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if targetHumanoidRootPart then
+                -- Get target position and local player position
+                local targetPosition = targetHumanoidRootPart.Position
+                local playerPosition = character.HumanoidRootPart.Position
+                
+                -- Update the local character's CFrame to look at the target
+                character.HumanoidRootPart.CFrame = CFrame.lookAt(playerPosition, targetPosition)
+            else
+                print("Target player does not have a HumanoidRootPart.")
+            end
+        end
+        wait(0.1) -- Wait to avoid high CPU usage and maintain smooth operation
+    end
+end
+
+-- Function to start the target-facing process
+local function startFacingTarget()
+    if not faceTargetConnection then
+        -- Connect to the Heartbeat event to continuously update the CFrame
+        faceTargetConnection = game:GetService("RunService").Heartbeat:Connect(faceTargetLoop)
+    end
+end
+
+-- Function to stop the target-facing process
+local function stopFacingTarget()
+    if faceTargetConnection then
+        -- Disconnect the Heartbeat event when no longer facing the target
+        faceTargetConnection:Disconnect()
+        faceTargetConnection = nil
+    end
+end
+
+-- Toggle to enable/disable the "Face Target" functionality
+local Toggle2 = Section:Toggle({
+    Name = "Face Target Toggle", -- String
+    Default = false, -- Boolean
+    Callback = function(Bool)
+        if Bool then
+            -- Enable the target-facing functionality
+            isFacingTarget = true
+            startFacingTarget()
+        else
+            -- Disable the target-facing functionality
+            isFacingTarget = false
+            stopFacingTarget()
+        end
+    end
+})
+
+-- UI Elements for inputting the target player's username
+local BigTextbox = Section:BigTextbox({
+    Name = "TINITIGAN KO", -- String
+    Default = "Player's username", -- String
+    PlaceHolderText = "Player's username", -- String
+    ResetOnFocus = true, -- Bool
+    Callback = function(Text)
+        -- Set target player dynamically based on textbox input
+        setTargetPlayer(Text)
+    end
+})
+
+-- Added safety check to prevent errors if the local player or target player's character is missing.
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    character = game.Players.LocalPlayer.Character
+end)
+
+local Button = Section1:Button({
+	Name = "AUTO DC",
+	Callback = function()
+            -- Function to automatically disconnect the player when there are 9 players
+local function disconnectPlayer()
+    -- Kicks the player with a custom message
+    game.Players.LocalPlayer:Kick("TANGINA MO MAY NA DC.")
+end
+
+-- Monitor when a player leaves the game
+game.Players.PlayerRemoving:Connect(function(player)
+    -- Check if the current player count is 9 after one leaves
+    if #game.Players:GetPlayers() == 9 then
+        -- Disconnect the local player
+        disconnectPlayer()
+    end
+end)
+
+		Library:Notify({
+			Name = "GUMANA SIYA!!",
+			Text = "MAWAWALA KANA PAG MAY UMALIS",
+			Icon = "rbxassetid://11401835376",
+			Duration = 3,
+		})
+	end,
+})
