@@ -261,3 +261,209 @@ end)
 		})
 	end,
 })
+
+local Button = Section:Button({
+	Name = "Anti Lag", -- String
+	Callback = function()
+            -- Function to disable rendering and effects (ORIGINAL)
+local function disableRenderingAndEffects()
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            obj.Transparency = 1 -- Make all parts invisible
+            obj.CastShadow = false -- Disable shadow casting
+            obj.Material = Enum.Material.SmoothPlastic -- Simplify material for performance
+        elseif obj:IsA("Decal") or obj:IsA("Texture") then
+            obj:Destroy() -- Remove decals and textures
+        elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") then
+            obj:Destroy() -- Remove particle emitters, trails, and beams
+        elseif obj:IsA("SurfaceGui") or obj:IsA("BillboardGui") then
+            obj:Destroy() -- Remove GUI elements attached to parts
+        elseif obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+            obj:Destroy() -- Remove light sources
+        elseif obj:IsA("MeshPart") then
+            obj.MeshId = "" -- Remove custom meshes
+            obj.TextureID = "" -- Remove associated textures
+        end
+    end
+end
+
+-- Function to disable lighting effects (ORIGINAL)
+local function disableLighting()
+    local lighting = game:GetService("Lighting")
+    lighting.GlobalShadows = false -- Disable global shadows
+    lighting.Brightness = 0 -- Turn off all brightness
+    lighting.Ambient = Color3.new(0, 0, 0) -- Set ambient lighting to black
+    lighting.OutdoorAmbient = Color3.new(0, 0, 0) -- Set outdoor ambient lighting to black
+    lighting.EnvironmentDiffuseScale = 0 -- Disable environmental diffuse lighting
+    lighting.EnvironmentSpecularScale = 0 -- Disable environmental specular lighting
+    lighting.FogStart = 0 -- Remove fog rendering
+    lighting.FogEnd = 0 -- Ensure no fog
+    lighting.Technology = Enum.Technology.Compatibility -- Use Compatibility lighting for lower GPU usage
+end
+
+-- Function to disable sounds (ORIGINAL)
+local function disableSounds()
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("Sound") then
+            obj:Stop() -- Stop playing the sound
+            obj:Destroy() -- Remove the sound object
+        end
+    end
+end
+
+-- Function to remove character rendering (ORIGINAL)
+local function disableCharacterRendering()
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        local character = player.Character or player.CharacterAdded:Wait()
+        for _, obj in ipairs(character:GetDescendants()) do
+            if obj:IsA("BasePart") then
+                obj.Transparency = 1 -- Make parts invisible
+                obj.CanCollide = true -- Ensure collisions are maintained
+            elseif obj:IsA("MeshPart") then
+                obj.MeshId = "" -- Remove meshes
+                obj.TextureID = "" -- Remove textures
+            elseif obj:IsA("Accessory") or obj:IsA("Clothing") then
+                obj:Destroy() -- Remove accessories and clothing
+            elseif obj:IsA("Humanoid") then
+                obj:SetStateEnabled(Enum.HumanoidStateType.Dead, false) -- Disable death animations
+                obj:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false) -- Disable ragdoll
+            end
+        end
+    end
+end
+
+-- Function to disable animations (NEW)
+local function disableAnimations()
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
+                track:Stop() -- Stop all playing animations
+            end
+        end
+    end
+end
+
+-- Function to reduce terrain complexity (ORIGINAL)
+local function optimizeTerrain()
+    local terrain = workspace:FindFirstChildOfClass("Terrain")
+    if terrain then
+        terrain.WaterWaveSize = 0 -- Disable water waves
+        terrain.WaterWaveSpeed = 0 -- Disable wave movement
+        terrain.WaterReflectance = 0 -- Remove reflections
+        terrain.WaterTransparency = 1 -- Make water invisible
+        terrain.MaterialColors = false -- Simplify terrain materials
+    end
+end
+
+-- Function to stop unnecessary scripts (ORIGINAL)
+local function stopUnnecessaryScripts()
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("Script") or obj:IsA("LocalScript") then
+            obj.Disabled = true -- Disable scripts
+        end
+    end
+end
+
+-- Function to remove additional visual effects (ORIGINAL)
+local function removePostProcessingEffects()
+    local lighting = game:GetService("Lighting")
+    for _, effect in ipairs(lighting:GetChildren()) do
+        if effect:IsA("PostEffect") then
+            effect:Destroy() -- Remove visual effects like blur, bloom, etc.
+        end
+    end
+end
+
+-- Function to reduce network traffic (NEW)
+local function reduceNetworkTraffic()
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            obj.NetworkOwner = Enum.NetworkOwner.None -- Reduce network ownership updates
+        end
+    end
+end
+
+-- Function to disable camera and UI (NEW)
+local function disableCameraAndUI()
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        local playerGui = player:FindFirstChildOfClass("PlayerGui")
+        if playerGui then
+            playerGui.Enabled = false -- Disable the entire UI
+        end
+        local camera = workspace.CurrentCamera
+        if camera then
+            camera.CameraType = Enum.CameraType.Scriptable -- Disable default camera behavior
+        end
+    end
+end
+
+-- Function to optimize physics (NEW)
+local function optimizePhysics()
+    settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Disabled
+    settings().Physics.AllowSleep = true -- Allow parts to sleep when idle
+end
+
+-- Function to disable non-essential replication (NEW)
+local function disableNonEssentialReplication()
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and not obj.Anchored then
+            obj:SetNetworkOwner(nil) -- Disable network ownership
+        end
+    end
+end
+
+-- Function to reduce memory usage by cleaning up unused references and parts (NEW)
+local function reduceMemoryUsage()
+    -- Clean up unused variables or parts
+    collectgarbage("collect")  -- Manually call garbage collection to free up unused memory
+
+    -- Remove any unused or orphaned objects from workspace
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and obj.Parent == nil then
+            obj:Destroy()
+        end
+    end
+end
+
+-- Apply all optimizations (UPDATED)
+local function optimizeGame()
+    disableRenderingAndEffects()
+    disableLighting()
+    disableSounds()
+    disableCharacterRendering()
+    disableAnimations() -- NEW
+    optimizeTerrain()
+    stopUnnecessaryScripts()
+    removePostProcessingEffects()
+    reduceNetworkTraffic() -- NEW
+    disableCameraAndUI() -- NEW
+    optimizePhysics() -- NEW
+    disableNonEssentialReplication() -- NEW
+    reduceMemoryUsage() -- NEW (Memory Optimization)
+end
+
+-- Run optimization (ORIGINAL)
+optimizeGame()
+
+-- Reapply optimizations periodically to ensure persistence (UPDATED)
+local debounce = false
+local function periodicOptimization()
+    if not debounce then
+        debounce = true
+        optimizeGame()
+        task.wait(10)  -- Wait for 10 seconds before reapplying
+        debounce = false
+    end
+end
+
+-- Run optimization every 10 seconds (loop with debounce)
+while true do
+    periodicOptimization()
+    task.wait(10) -- Reapply every 10 seconds
+end
+
+		-- Function
+	end
+})
